@@ -36,14 +36,20 @@ void main() {
     Err_handling("Listen ERR");
   }
   int clntAddr_size = sizeof(clntAddr); // accept(Socket, sockaddr*, int *addrlen) addrlen이 포인터형식이므로 bind와는 다르게 변수하나 만들어줘야함
-  ClntSock = accept(ServSock, (SOCKADDR*)&clntAddr, &clntAddr_size); // 클라이언트의 연결요청 수락(성공시 소켓핸들, 실패시 invalid_socket)
-  if (ClntSock == INVALID_SOCKET) {
-    Err_handling("Client socket ERR");
+  char message[BUFSIZ];
+  for (int i = 0; i < 5; i++) {
+    ClntSock = accept(ServSock, (SOCKADDR*)&clntAddr, &clntAddr_size);
+    if (ClntSock == -1) {
+      Err_handling("Client sock ERR");
+    }
+    printf("Connected client %d\n", i + 1);
+
+    while (recv(ClntSock, message, sizeof(message), 0) != 0) {
+      send(ClntSock, message, sizeof(message), 0);
+    }
+    closesocket(ClntSock);
   }
 
-  send(ClntSock, "HI im server", 15, 0);
-  //recv()
-  closesocket(ClntSock);
   closesocket(ServSock);
   WSACleanup();
 
