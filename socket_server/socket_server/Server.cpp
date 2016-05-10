@@ -13,6 +13,8 @@ void main() {
   WSADATA wsaData;
   SOCKET ServSock, ClntSock;
   SOCKADDR_IN servAddr, clntAddr;
+  bool opt = TRUE;
+  int optlen = sizeof(opt);
 
   if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) { // WSAStartup함수를 호출하여 소켓버전을 알리고 라이브러리 초기화 작업(성공시 0 실패시 0아닌 에러코드)
     Err_handling("WSAStartup ERR");
@@ -22,6 +24,9 @@ void main() {
   if (ServSock == INVALID_SOCKET) {
     Err_handling("INVALID_SOCKET");
   }
+
+  setsockopt(ServSock, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, optlen); // 서버가 먼저 FIN하였을 때 TIME-WAIT 상태가된다.
+  //디폴트값은 0이며 time-wait상황에서의 소켓할당이 불가능하다. 이를 setsockopt로 true로 바꾸어주면 재할당이 가능하다.
 
   memset(&servAddr, 0, sizeof(servAddr));
   servAddr.sin_family = AF_INET; // ipv4
